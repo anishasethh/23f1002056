@@ -42,6 +42,10 @@ app.add_middleware(
 app = FastAPI()
 load_dotenv()
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the FastAPI application!"}
+    
 # @app.get('/ask')
 # def ask(prompt: str):
 #     """ Prompt Gemini to generate a response based on the given prompt. """

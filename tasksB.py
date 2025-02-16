@@ -2,6 +2,12 @@
 
 # B1 & B2: Security Checks
 import os
+import json
+import subprocess
+import duckdb
+import csv 
+import requests
+import markdown
 
 def B12(filepath):
     if filepath.startswith('/data'):
@@ -21,10 +27,20 @@ def B3(url, save_path):
         file.write(response.text)
 
 # B4: Clone a Git Repo and Make a Commit
-# def clone_git_repo(repo_url, commit_message):
-#     import subprocess
-#     subprocess.run(["git", "clone", repo_url, "/data/repo"])
-#     subprocess.run(["git", "-C", "/data/repo", "commit", "-m", commit_message])
+def clone_git_repo_and_commit(repo_url: str, output_dir: str, commit_message: str):
+    """
+    This tool function clones a Git repository from the specified URL and makes a commit with the provided message.
+    Args:
+        repo_url (str): The URL of the Git repository to clone.
+        output_dir (str): The directory where the repository will be cloned.
+        commit_message (str): The commit message to use when committing changes.
+    """
+    try:
+        subprocess.run(["git", "clone", repo_url, output_dir])
+        subprocess.run(["git", "add", "."], cwd=output_dir)
+        subprocess.run(["git", "commit", "-m", commit_message], cwd=output_dir)
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred: {e}")
 
 # B5: Run SQL Query
 def B5(db_path, query, output_filename):
@@ -60,12 +76,11 @@ def B7(image_path, output_path, resize=None):
     img.save(output_path)
 
 # B8: Audio Transcription
-# def B8(audio_path):
-#     import openai
-#     if not B12(audio_path):
-#         return None
-#     with open(audio_path, 'rb') as audio_file:
-#         return openai.Audio.transcribe("whisper-1", audio_file)
+
+def transcribe_audio(input_file: str, output_file: str):
+    transcript = "Transcribed text"  # Placeholder
+    with open(output_file, "w") as file:
+        file.write(transcript)
 
 # B9: Markdown to HTML Conversion
 def B9(md_path, output_path):
@@ -80,14 +95,20 @@ def B9(md_path, output_path):
         file.write(html)
 
 # B10: API Endpoint for CSV Filtering
-# from flask import Flask, request, jsonify
-# app = Flask(__name__)
-# @app.route('/filter_csv', methods=['POST'])
-# def filter_csv():
-#     import pandas as pd
-#     data = request.json
-#     csv_path, filter_column, filter_value = data['csv_path'], data['filter_column'], data['filter_value']
-#     B12(csv_path)
-#     df = pd.read_csv(csv_path)
-#     filtered = df[df[filter_column] == filter_value]
-#     return jsonify(filtered.to_dict(orient='records'))
+
+def convert_markdown_to_html(input_file: str, output_file: str):
+    with open(input_file, "r") as file:
+        html = markdown.markdown(file.read())
+    with open(output_file, "w") as file:
+        file.write(html)
+
+#Write an API endpoint that filters a CSV file and returns JSON data
+def filter_csv(input_file: str, column: str, value: str, output_file: str):
+    results = []
+    with open(input_file, newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row[column] == value:
+                results.append(row)
+    with open(output_file, "w") as file:
+        json.dump(results, file)

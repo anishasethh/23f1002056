@@ -1,4 +1,5 @@
 import sqlite3
+from fastapi import HTTPException
 import subprocess
 from dateutil.parser import parse
 from datetime import datetime
@@ -28,6 +29,14 @@ def A1(email="23f1002056@ds.study.iitm.ac.in"):
         raise HTTPException(status_code=500, detail=f"Error: {e.stderr}")
 # A1()
 def A2(prettier_version="prettier@3.4.2", filename="/data/format.md"):
+    # Ensure Prettier is installed
+    try:
+        subprocess.check_call(['npm', 'list', prettier_version], shell=True)
+    except subprocess.CalledProcessError:
+        try:
+            subprocess.check_call(['npm', 'install', prettier_version], shell=True)
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Failed to install Prettier: {e}")
     command = [r"C:\Program Files\nodejs\npx.cmd", prettier_version, "--write", filename]
     try:
         subprocess.run(command, check=True)
